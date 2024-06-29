@@ -269,6 +269,14 @@ else:
             extra_link_args=['-fopenmp','-g'],
             # define_macros=[("VERSION_INFO", __version__)],
         ),
+        Pybind11Extension(
+            "pybind11_pml_updates_magnetic_HORIPML",
+            ["gprMax/pybind11/pml_updates_magnetic_HORIPML.cpp"],
+            # Example: passing in the version to the compiled code
+            extra_compile_args=['-fopenmp','-g'],
+            extra_link_args=['-fopenmp','-g'],
+            # define_macros=[("VERSION_INFO", __version__)],
+        ),
     ]
     extensions.extend(pybind11_modules);
 

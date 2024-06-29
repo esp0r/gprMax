@@ -433,7 +433,7 @@ class PML:
         correction.
         """
 
-        pmlmodule = "gprMax.cython.pml_updates_magnetic_" + self.G.pmls["formulation"]
+        pmlmodule = "pybind11_pml_updates_magnetic_" + self.G.pmls["formulation"]
         func = getattr(import_module(pmlmodule), "order" + str(len(self.CFS)) + "_" + self.direction)
         func(
             self.xs,
