@@ -21,6 +21,8 @@ from importlib import import_module
 
 import numpy as np
 
+# import copy
+
 import gprMax.config as config
 
 from .cython.pml_build import pml_average_er_mr
@@ -230,6 +232,18 @@ class PML:
 
         self.initialise_field_arrays()
 
+    # def grid_compare(self, a, b, name):
+    #     relative_tolerance = 0.01
+    #     absolute_tolerance = 1e-2
+    #     absolute_error = np.abs(a - b)
+    #     with np.errstate(divide='ignore', invalid='ignore'):
+    #         relative_error = np.where(a != 0, absolute_error / np.abs(a), np.inf)
+    #     # diff_indices = np.where((relative_error > relative_tolerance) & (absolute_error > absolute_tolerance))
+    #     diff_indices = np.where((relative_error > relative_tolerance) & (~np.isinf(relative_error)) & (absolute_error > absolute_tolerance))
+    #     if diff_indices[0].size > 0:
+    #         first_diff_index = tuple(index[0] for index in diff_indices)
+    #         print(f"{name} not equal. First difference at index: {first_diff_index}") 
+
     def check_kappamin(self):
         """Checks that the sum of all kappamin values, i.e. when a multi-pole
         PML is used, is not less than one.
@@ -346,9 +360,18 @@ class PML:
         """This functions updates electric field components with the PML
         correction.
         """
+        # test_subject="yminus";
+        # if(self.direction==test_subject):
+        # pml_tmp=copy.deepcopy(self)
+        # pmlmodule_ref = "gprMax.cython.pml_updates_electric_" + self.G.pmls["formulation"]
 
-        pmlmodule = "gprMax.cython.pml_updates_electric_" + self.G.pmls["formulation"]
+        pmlmodule = "pybind11_pml_updates_electric_" + self.G.pmls["formulation"]
         func = getattr(import_module(pmlmodule), "order" + str(len(self.CFS)) + "_" + self.direction)
+
+        # func_ref = getattr(import_module(pmlmodule_ref), "order" + str(len(self.CFS)) + "_" + self.direction)
+
+        # if(self.direction!=test_subject): func=func_ref;
+
         func(
             self.xs,
             self.xf,
@@ -373,6 +396,37 @@ class PML:
             self.ERF,
             self.d,
         )
+        # if(self.direction==test_subject):
+        #     func_ref(
+        #         pml_tmp.xs,
+        #         pml_tmp.xf,
+        #         pml_tmp.ys,
+        #         pml_tmp.yf,
+        #         pml_tmp.zs,
+        #         pml_tmp.zf,
+        #         config.get_model_config().ompthreads,
+        #         pml_tmp.G.updatecoeffsE,
+        #         pml_tmp.G.ID,
+        #         pml_tmp.G.Ex,
+        #         pml_tmp.G.Ey,
+        #         pml_tmp.G.Ez,
+        #         pml_tmp.G.Hx,
+        #         pml_tmp.G.Hy,
+        #         pml_tmp.G.Hz,
+        #         pml_tmp.EPhi1,
+        #         pml_tmp.EPhi2,
+        #         pml_tmp.ERA,
+        #         pml_tmp.ERB,
+        #         pml_tmp.ERE,
+        #         pml_tmp.ERF,
+        #         pml_tmp.d,
+        #     )
+            
+        #     self.grid_compare(self.G.Ex, pml_tmp.G.Ex, "Ex");
+        #     self.grid_compare(self.G.Ey, pml_tmp.G.Ey, "Ey");
+        #     self.grid_compare(self.G.Ez, pml_tmp.G.Ez, "Ez");
+        #     self.grid_compare(self.EPhi1, pml_tmp.EPhi1, "EPhi1");
+        #     self.grid_compare(self.EPhi2, pml_tmp.EPhi2, "EPhi2");
 
     def update_magnetic(self):
         """This functions updates magnetic field components with the PML
