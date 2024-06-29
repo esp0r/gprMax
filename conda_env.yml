@@ -19,6 +19,7 @@ dependencies:
   - humanize
 #  - mpi4py
   - numpy-stl
+  - pybind11
 #  - pycuda
 #  - pyopencl
   - terminaltables

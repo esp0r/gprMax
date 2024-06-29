@@ -27,6 +27,7 @@ from pathlib import Path
 
 import numpy as np
 from Cython.Build import cythonize
+from pybind11.setup_helpers import Pybind11Extension, build_ext
 from jinja2 import Environment, FileSystemLoader
 from setuptools import Extension, find_packages, setup
 
@@ -251,6 +252,17 @@ else:
         nthreads=None,
         annotate=False,
     )
+    pybind11_modules = [
+        Pybind11Extension(
+            "pybind11_fields_updates_normal",
+            ["gprMax/pybind11/fields_updates_normal.cpp"],
+            # Example: passing in the version to the compiled code
+            extra_compile_args=['-fopenmp','-g'],
+            extra_link_args=['-fopenmp','-g'],
+            # define_macros=[("VERSION_INFO", __version__)],
+        ),
+    ]
+    extensions.extend(pybind11_modules);
 
     # Parse long_description from README.rst file.
     with open("README.rst", "r", encoding="utf-8") as fd:
@@ -277,6 +289,7 @@ else:
             "scipy",
             "terminaltables",
             "tqdm",
+            "pybind11"
         ],
         ext_modules=extensions,
         packages=find_packages(),
@@ -293,4 +306,5 @@ else:
             "Programming Language :: Python :: 3",
             "Topic :: Scientific/Engineering",
         ],
+        cmdclass={"build_ext": build_ext},
     )

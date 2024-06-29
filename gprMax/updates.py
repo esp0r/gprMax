@@ -24,12 +24,17 @@ import numpy as np
 from jinja2 import Environment, PackageLoader
 
 import gprMax.config as config
+# import copy
 
 from .cuda_opencl import (knl_fields_updates, knl_snapshots,
                           knl_source_updates, knl_store_outputs)
-from .cython.fields_updates_normal import \
+# from .cython.fields_updates_normal import \
+#     update_electric as update_electric_cpu
+from pybind11_fields_updates_normal import \
     update_electric as update_electric_cpu
-from .cython.fields_updates_normal import \
+# from .cython.fields_updates_normal import \
+#     update_magnetic as update_magnetic_cpu_ref
+from pybind11_fields_updates_normal import \
     update_magnetic as update_magnetic_cpu
 from .fields_outputs import store_outputs as store_outputs_cpu
 from .receivers import dtoh_rx_array, htod_rx_arrays
@@ -51,6 +56,17 @@ class CPUUpdates:
 
         self.grid = G
 
+    # def grid_compare(self, a, b, name):
+    #     relative_tolerance = 0.01
+    #     absolute_tolerance = 1e-4
+    #     absolute_error = np.abs(a - b)
+    #     with np.errstate(divide='ignore', invalid='ignore'):
+    #         relative_error = np.where(a != 0, absolute_error / np.abs(a), np.inf)
+    #     # diff_indices = np.where((relative_error > relative_tolerance) & (absolute_error > absolute_tolerance))
+    #     diff_indices = np.where((relative_error > relative_tolerance) & (~np.isinf(relative_error)) & (absolute_error > absolute_tolerance))
+    #     if diff_indices[0].size > 0:
+    #         first_diff_index = tuple(index[0] for index in diff_indices)
+    #         print(f"{name} not equal. First difference at index: {first_diff_index}") 
     def store_outputs(self):
         """Stores field component values for every receiver and transmission line."""
         store_outputs_cpu(self.grid)
@@ -67,6 +83,7 @@ class CPUUpdates:
 
     def update_magnetic(self):
         """Updates magnetic field components."""
+        # grid_tmp=copy.deepcopy(self.grid)
         update_magnetic_cpu(
             self.grid.nx,
             self.grid.ny,
@@ -81,6 +98,26 @@ class CPUUpdates:
             self.grid.Hy,
             self.grid.Hz,
         )
+        # update_magnetic_cpu_ref(
+        #     grid_tmp.nx,
+        #     grid_tmp.ny,
+        #     grid_tmp.nz,
+        #     config.get_model_config().ompthreads,
+        #     grid_tmp.updatecoeffsH,
+        #     grid_tmp.ID,
+        #     grid_tmp.Ex,
+        #     grid_tmp.Ey,
+        #     grid_tmp.Ez,
+        #     grid_tmp.Hx,
+        #     grid_tmp.Hy,
+        #     grid_tmp.Hz,
+        # )
+        # self.grid_compare(self.grid.Ex, grid_tmp.Ex, "Ex")
+        # self.grid_compare(self.grid.Ey, grid_tmp.Ey, "Ey")
+        # self.grid_compare(self.grid.Ez, grid_tmp.Ez, "Ez")
+        # self.grid_compare(self.grid.Hx, grid_tmp.Hx, "Hx")
+        # self.grid_compare(self.grid.Hy, grid_tmp.Hy, "Hy")
+        # self.grid_compare(self.grid.Hz, grid_tmp.Hz, "Hz")
 
     def update_magnetic_pml(self):
         """Updates magnetic field components with the PML correction."""
@@ -103,6 +140,7 @@ class CPUUpdates:
     def update_electric_a(self):
         """Updates electric field components."""
         # All materials are non-dispersive so do standard update.
+        # grid_tmp=copy.deepcopy(self.grid)
         if config.get_model_config().materials["maxpoles"] == 0:
             update_electric_cpu(
                 self.grid.nx,
@@ -118,7 +156,26 @@ class CPUUpdates:
                 self.grid.Hy,
                 self.grid.Hz,
             )
-
+            # update_electric_cpu_ref(
+            #     grid_tmp.nx,
+            #     grid_tmp.ny,
+            #     grid_tmp.nz,
+            #     config.get_model_config().ompthreads,
+            #     grid_tmp.updatecoeffsE,
+            #     grid_tmp.ID,
+            #     grid_tmp.Ex,
+            #     grid_tmp.Ey,
+            #     grid_tmp.Ez,
+            #     grid_tmp.Hx,
+            #     grid_tmp.Hy,
+            #     grid_tmp.Hz,    
+            # )
+            # self.grid_compare(self.grid.Ex, grid_tmp.Ex, "Ex")
+            # self.grid_compare(self.grid.Ey, grid_tmp.Ey, "Ey")
+            # self.grid_compare(self.grid.Ez, grid_tmp.Ez, "Ez")
+            # self.grid_compare(self.grid.Hx, grid_tmp.Hx, "Hx")
+            # self.grid_compare(self.grid.Hy, grid_tmp.Hy, "Hy")
+            # self.grid_compare(self.grid.Hz, grid_tmp.Hz, "Hz")
         # If there are any dispersive materials do 1st part of dispersive update
         # (it is split into two parts as it requires present and updated electric field values).
         else:
