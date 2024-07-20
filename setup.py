@@ -257,24 +257,24 @@ else:
             "pybind11_fields_updates_normal",
             ["gprMax/pybind11/fields_updates_normal.cpp"],
             # Example: passing in the version to the compiled code
-            extra_compile_args=['-fopenmp','-g'],
-            extra_link_args=['-fopenmp','-g'],
+            extra_compile_args=['-fopenmp','-g','-O3','-march=native'],
+            extra_link_args=['-fopenmp','-g','-O3','-march=native'],
             # define_macros=[("VERSION_INFO", __version__)],
         ),
         Pybind11Extension(
             "pybind11_pml_updates_electric_HORIPML",
             ["gprMax/pybind11/pml_updates_electric_HORIPML.cpp"],
             # Example: passing in the version to the compiled code
-            extra_compile_args=['-fopenmp','-g'],
-            extra_link_args=['-fopenmp','-g'],
+            extra_compile_args=['-fopenmp','-g','-O3','-march=native'],
+            extra_link_args=['-fopenmp','-g','-O3','-march=native'],
             # define_macros=[("VERSION_INFO", __version__)],
         ),
         Pybind11Extension(
             "pybind11_pml_updates_magnetic_HORIPML",
             ["gprMax/pybind11/pml_updates_magnetic_HORIPML.cpp"],
             # Example: passing in the version to the compiled code
-            extra_compile_args=['-fopenmp','-g'],
-            extra_link_args=['-fopenmp','-g'],
+            extra_compile_args=['-fopenmp','-g','-O3','-march=native'],
+            extra_link_args=['-fopenmp','-g','-O3','-march=native'],
             # define_macros=[("VERSION_INFO", __version__)],
         ),
     ]
