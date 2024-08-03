@@ -21,7 +21,7 @@ import gprMax.config as config
 from .grid import CUDAGrid, FDTDGrid, OpenCLGrid
 from .subgrids.updates import create_updates as create_subgrid_updates
 from .updates import CPUUpdates, CUDAUpdates, OpenCLUpdates
-
+from .xpu_solver import XPUSolver
 
 def create_G():
     """Create grid object according to solver.
@@ -68,10 +68,12 @@ def create_solver(G):
                 u.set_dispersive_updates()
         solver = Solver(updates, hsg=True)
     elif config.sim_config.general["solver"] == "cpu":
-        updates = CPUUpdates(G)
-        if config.get_model_config().materials["maxpoles"] != 0:
-            updates.set_dispersive_updates()
-        solver = Solver(updates)
+        # updates = CPUUpdates(G)
+        # if config.get_model_config().materials["maxpoles"] != 0:
+        #     updates.set_dispersive_updates()
+        # solver = Solver(updates)
+        solver = XPUSolver(G)
+
     elif config.sim_config.general["solver"] == "cuda":
         updates = CUDAUpdates(G)
         solver = Solver(updates)
@@ -104,18 +106,23 @@ class Solver:
             iterator: can be range() or tqdm()
         """
 
+        #print all iterators
+        # print("num of iterator",len(iterator))
+        # print("nx: ",self.updates.grid.nx)
+
+        
         self.updates.time_start()
 
         for iteration in iterator:
             self.updates.store_outputs()
             self.updates.store_snapshots(iteration)
             self.updates.update_magnetic()
-            self.updates.update_magnetic_pml()
+            # self.updates.update_magnetic_pml()
             self.updates.update_magnetic_sources()
             if self.hsg:
                 self.updates.hsg_2()
             self.updates.update_electric_a()
-            self.updates.update_electric_pml()
+            # self.updates.update_electric_pml()
             self.updates.update_electric_sources()
             if self.hsg:
                 self.updates.hsg_1()
