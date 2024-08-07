@@ -52,7 +52,7 @@ class CPUUpdates:
         self.grid = G
 
     def store_outputs(self):
-        """Stores field component values for every receiver and transmission line."""
+        """Stores field component values store_snapshots every receiver and transmission line."""
         store_outputs_cpu(self.grid)
 
     def store_snapshots(self, iteration):
@@ -61,9 +61,22 @@ class CPUUpdates:
         Args:
             iteration: int for iteration number.
         """
-        for snap in self.grid.snapshots:
-            if snap.time == iteration + 1:
-                snap.store(self.grid)
+        # for snap in self.grid.snapshots:
+        #     if snap.time == iteration + 1:
+        #         snap.store(self.grid)
+        import h5py
+        f = h5py.File("grid.h5", "a")
+        current_timestep = iteration
+        # add zeros before the timestep number to make it 5 digits long
+        timestep_str = str(current_timestep).zfill(5)
+        group = f.create_group(timestep_str)
+        group.create_dataset("Ex", data=self.grid.Ex)
+        group.create_dataset("Ey", data=self.grid.Ey)
+        group.create_dataset("Ez", data=self.grid.Ez)
+        group.create_dataset("Hx", data=self.grid.Hx)
+        group.create_dataset("Hy", data=self.grid.Hy)
+        group.create_dataset("Hz", data=self.grid.Hz)
+        f.close()
 
     def update_magnetic(self):
         """Updates magnetic field components."""
