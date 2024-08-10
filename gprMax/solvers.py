@@ -116,15 +116,19 @@ class Solver:
 
         for iteration in iterator:
             self.updates.store_outputs()
-            self.updates.store_snapshots(iteration)
-            self.updates.update_magnetic()
-            # self.updates.update_magnetic_pml()
-            # self.updates.update_magnetic_sources()
-            # if self.hsg:
-            #     self.updates.hsg_2()
+            # self.updates.store_snapshots(iteration)
+
             self.updates.update_electric_a()
             # self.updates.update_electric_pml()
             self.updates.update_electric_sources()
+
+            # if self.hsg:
+            #     self.updates.hsg_2()
+
+            self.updates.update_magnetic()
+            # self.updates.update_magnetic_pml()
+            # self.updates.update_magnetic_sources()
+
             # if self.hsg:
             #     self.updates.hsg_1()
             # self.updates.update_electric_b()
